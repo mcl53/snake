@@ -2,6 +2,7 @@ import pygame
 from random import randrange
 import os
 import pandas as pd
+import fonts
 
 
 def spawn_food(snake):
@@ -17,9 +18,9 @@ def draw_food(x, y, window, snake_obj):
 	pygame.draw.rect(window, (255, 0, 0), (x, y, snake_obj.width, snake_obj.height))
 
 
-def end_game(window, font, score, game_over, new_game, quit_text):
+def end_game(window, score, game_over, new_game, quit_text):
 	window.fill((0, 0, 0))
-	score_text = font.render("Score: " + score, True, (0, 0, 255))
+	score_text = fonts.font.render("Score: " + score, True, (0, 0, 255))
 	g_o_height = game_over.get_height()
 	n_g_height = new_game.get_height()
 	q_height = quit_text.get_height()
@@ -46,8 +47,7 @@ def end_game(window, font, score, game_over, new_game, quit_text):
 	return ret_val
 
 
-def evaluate_current_key(keys_in):
-	global current_key
+def evaluate_current_key(current_key, keys_in):
 	if keys_in[pygame.K_LEFT]:
 		if current_key != "right":
 			current_key = "left"
@@ -63,9 +63,11 @@ def evaluate_current_key(keys_in):
 	elif keys_in[pygame.K_DOWN]:
 		if current_key != "up":
 			current_key = "down"
+	
+	return current_key
 
 
-def read_scores_file(score):
+def read_scores_file(score, window):
 	high_score = False
 	path_to_csv = "." + os.path.sep + "scores.csv"
 	scores_data = pd.read_csv(path_to_csv)
@@ -82,23 +84,23 @@ def read_scores_file(score):
 	scores_data = scores_data.append(new_score, ignore_index=True)
 	scores_data = scores_data.sort_values(["Score"], ascending=False)
 	print(scores_data)
-	show_score_screen(high_score, scores_data, score)
 	scores_data.to_csv(path_to_csv, columns=["Name", "Score"], index=False)
+	return show_score_screen(window, scores_data, score)
 
 
-def show_score_screen(high_score, scores_data, score):
+def show_score_screen(window, scores_data, score):
 	window.fill((0, 0, 0))
-	score_text = font.render("Score: " + score, True, (0, 0, 255))
+	score_text = fonts.font.render("Score: " + score, True, (0, 0, 255))
 	window.blit(score_text, ((510 - score_text.get_width()) / 2, 60))
 	for i in range(1, 9):
 		string_to_display = str(i) + ".)   " + str(scores_data["Name"][i - 1]) + "   " + str(
 			scores_data["Score"][i - 1])
-		text = small_font.render(string_to_display, True, (255, 165, 0))
+		text = fonts.small_font.render(string_to_display, True, (255, 165, 0))
 		window.blit(text, (
 		(510 - text.get_width()) / 2, 60 + (score_text.get_height() + (text.get_height() * (i - 1))) + (i * 20)))
 	
-	global score_displayed
-	score_displayed = True
+	# Set score_displayed variable
+	return True
 
 # events = pygame.event.get()
 # for event in events:

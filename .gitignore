@@ -6,3 +6,6 @@
 .idea/vcs.xml
 .DS_Store
 .idea/workspace.xml
+*.pyc
+*.csv
+scores.csv

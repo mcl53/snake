@@ -79,5 +79,6 @@ class Snake:
 	def check_dead(self):
 		if [self.head_x, self.head_y] in self.rectangles[1:len(self.rectangles)]:
 			self.dead = True
+			self.delay = 0
 		else:
 			return

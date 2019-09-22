@@ -26,13 +26,16 @@ food_spawned = False
 food_x = None
 food_y = None
 score_displayed = False
+score = 0
 
 
 snake = Snake()
 
 current_time = time()
+clock = pygame.time.Clock()
 
 while run:
+	clock.tick(30)
 	pygame.time.delay(snake.delay)
 	
 	for event in pygame.event.get():
@@ -62,7 +65,6 @@ while run:
 			methods.draw_food(food_x, food_y, window, snake)
 		
 	if snake.dead and not score_displayed:
-		# run = end_game(game_over_text, new_game_text, quit_text)
 		score = str(len(snake.rectangles) + len(snake.new_rects))
 		score_displayed = methods.read_scores_file(score, window)
 		current_time = time()

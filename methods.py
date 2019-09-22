@@ -24,7 +24,6 @@ def end_game(window, score, game_over, new_game, quit_text):
 	g_o_height = game_over.get_height()
 	n_g_height = new_game.get_height()
 	q_height = quit_text.get_height()
-	s_height = score_text.get_height()
 	all_height = g_o_height + n_g_height + q_height
 	window.blit(game_over, ((510 - game_over.get_width()) / 2, (510 - all_height) / 2))
 	window.blit(new_game, ((510 - new_game.get_width()) / 2, ((510 - all_height) / 2) + g_o_height))
@@ -70,19 +69,27 @@ def evaluate_current_key(current_key, keys_in):
 def read_scores_file(score, window):
 	high_score = False
 	path_to_csv = "." + os.path.sep + "scores.csv"
-	scores_data = pd.read_csv(path_to_csv)
+	try:
+		scores_data = pd.read_csv(path_to_csv)
+	except NameError:
+		blank_scores = pd.DataFrame([[]], columns=["Name", "Score"])
+		blank_scores.to_csv(path=path_to_csv)
+		scores_data = pd.read_csv(path_to_csv)
+	
 	scores_data = scores_data.sort_values(["Score"], ascending=False)
 	print(scores_data)
-	if len(scores_data) > 5:
-		if int(score) > scores_data["Score"][4]:
+	if len(scores_data) > 8:
+		if int(score) > scores_data["Score"][7]:
 			print("New high score")
 			high_score = True
 	else:
 		print("New high score")
 		high_score = True
 	new_score = pd.DataFrame([["game", int(score)]], columns=["Name", "Score"])
-	scores_data = scores_data.append(new_score, ignore_index=True)
-	scores_data = scores_data.sort_values(["Score"], ascending=False)
+	if high_score:
+		scores_data = scores_data.append(new_score, ignore_index=True)
+		scores_data = scores_data.pop(scores_data[-1])
+		scores_data = scores_data.sort_values(["Score"], ascending=False)
 	print(scores_data)
 	scores_data.to_csv(path_to_csv, columns=["Name", "Score"], index=False)
 	return show_score_screen(window, scores_data, score)
@@ -101,10 +108,3 @@ def show_score_screen(window, scores_data, score):
 	
 	# Set score_displayed variable
 	return True
-
-# events = pygame.event.get()
-# for event in events:
-# 	if event.type == pygame.QUIT:
-# 		pygame.quit()
-# text_input.update(events)
-# window.blit(text_input.get_surface(), (0, 0))

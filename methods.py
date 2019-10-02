@@ -71,9 +71,9 @@ def read_scores_file(score, window):
 	path_to_csv = "." + os.path.sep + "scores.csv"
 	try:
 		scores_data = pd.read_csv(path_to_csv)
-	except NameError:
-		blank_scores = pd.DataFrame([[]], columns=["Name", "Score"])
-		blank_scores.to_csv(path=path_to_csv)
+	except (NameError, FileNotFoundError):
+		blank_scores = pd.DataFrame(columns=["Name", "Score"])
+		blank_scores.to_csv(path_or_buf=path_to_csv, index=False)
 		scores_data = pd.read_csv(path_to_csv)
 	
 	scores_data = scores_data.sort_values(["Score"], ascending=False)
@@ -81,15 +81,17 @@ def read_scores_file(score, window):
 	if len(scores_data) > 8:
 		if int(score) > scores_data["Score"][7]:
 			print("New high score")
+			scores_data = scores_data.drop(8, axis=0)
 			high_score = True
 	else:
 		print("New high score")
 		high_score = True
-	new_score = pd.DataFrame([["game", int(score)]], columns=["Name", "Score"])
+		
 	if high_score:
+		new_score = pd.DataFrame([["game", int(score)]], columns=["Name", "Score"])
 		scores_data = scores_data.append(new_score, ignore_index=True)
-		scores_data = scores_data.pop(scores_data[-1])
-		scores_data = scores_data.sort_values(["Score"], ascending=False)
+
+	scores_data = scores_data.sort_values(["Score"], ascending=False)
 	print(scores_data)
 	scores_data.to_csv(path_to_csv, columns=["Name", "Score"], index=False)
 	return show_score_screen(window, scores_data, score)
@@ -100,6 +102,8 @@ def show_score_screen(window, scores_data, score):
 	score_text = fonts.font.render("Score: " + score, True, (0, 0, 255))
 	window.blit(score_text, ((510 - score_text.get_width()) / 2, 60))
 	for i in range(1, 9):
+		if i > len(scores_data):
+			break
 		string_to_display = str(i) + ".)   " + str(scores_data["Name"][i - 1]) + "   " + str(
 			scores_data["Score"][i - 1])
 		text = fonts.small_font.render(string_to_display, True, (255, 165, 0))
